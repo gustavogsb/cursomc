@@ -1,5 +1,6 @@
 package com.gustavobastos.cursomc;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,20 @@ import com.gustavobastos.cursomc.domain.Cidade;
 import com.gustavobastos.cursomc.domain.Cliente;
 import com.gustavobastos.cursomc.domain.Endereco;
 import com.gustavobastos.cursomc.domain.Estado;
+import com.gustavobastos.cursomc.domain.Pagamento;
+import com.gustavobastos.cursomc.domain.PagamentoComBoleto;
+import com.gustavobastos.cursomc.domain.PagamentoComCartao;
+import com.gustavobastos.cursomc.domain.Pedido;
 import com.gustavobastos.cursomc.domain.Produto;
+import com.gustavobastos.cursomc.domain.enums.EstadoPagamento;
 import com.gustavobastos.cursomc.domain.enums.TipoCliente;
 import com.gustavobastos.cursomc.repositories.CategoriaRepository;
 import com.gustavobastos.cursomc.repositories.CidadeRepository;
 import com.gustavobastos.cursomc.repositories.ClienteRepository;
 import com.gustavobastos.cursomc.repositories.EnderecoRepository;
 import com.gustavobastos.cursomc.repositories.EstadoRepository;
+import com.gustavobastos.cursomc.repositories.PagamentoRepository;
+import com.gustavobastos.cursomc.repositories.PedidoRepository;
 import com.gustavobastos.cursomc.repositories.ProdutoRepository;
 //https://git-scm.com/book/pt-br/v1/Primeiros-passos-Configura%C3%A7%C3%A3o-Inicial-do-Git
 @SpringBootApplication
@@ -35,7 +43,12 @@ public class CursomcApplication implements CommandLineRunner{
 	@Autowired
 	private ClienteRepository clienteRepository;
 	@Autowired
-	private EnderecoRepository enderecoRepository;		
+	private EnderecoRepository enderecoRepository;	
+	@Autowired
+	private PedidoRepository pedidoRepository;
+	@Autowired
+	private PagamentoRepository pagametoRepository;		
+	
 	
 	public static void main(String[] args) {
 		SpringApplication.run(CursomcApplication.class, args);
@@ -85,6 +98,23 @@ public class CursomcApplication implements CommandLineRunner{
 		
 		clienteRepository.saveAll(Arrays.asList(cli1));
 		enderecoRepository.saveAll(Arrays.asList(e1,e2));
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+		
+		Pedido ped1 = new Pedido(null, sdf.parse("30/09/2017 10:32"), cli1, e1);
+		Pedido ped2 = new Pedido(null, sdf.parse("10/10/2017 19:35"), cli1, e2);
+		
+		Pagamento pagto1 = new PagamentoComCartao(null, EstadoPagamento.QUITADO, ped1, 6);
+		ped1.setPagamento(pagto1);
+		
+		Pagamento pagto2 = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE,ped2, sdf.parse("20/10/2017 00:00"), null);
+		ped2.setPagamento(pagto2);
+		
+		cli1.getPedidos().addAll(Arrays.asList(ped1,ped2));
+		
+		pedidoRepository.saveAll(Arrays.asList(ped1,ped2));
+		pagametoRepository.saveAll(Arrays.asList(pagto1,pagto2));
+		
 		
 		
 		
